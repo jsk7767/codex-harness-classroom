@@ -99,13 +99,16 @@ PASS_FAIL = """# PASS/FAIL 계약
 
 - 제목과 `[확인 필요]` 줄을 제외한 초안의 모든 게시 가능 내용 줄에 vault 루트 기준 `[근거: notes/store.md]` 형식의 근거가 하나 이상 있다.
 - 해당 파일이 vault 안에 실제로 존재한다.
+- 근거 파일이 비어 있지 않고, 초안의 숫자·할인·무료·주차 같은 핵심 단서와 의미 토큰이 원문에서 최소한으로 확인된다.
 - Fact Checker 승인 내용과 원문이 일치한다.
 - 확인되지 않은 메뉴, 가격, 할인, 영업시간, 주차, 후기 또는 고객 발언이 없다.
+- 자동 validator는 최소 텍스트 지원 검사이며, 최종 의미 판정은 Quality Checker의 원문 독립 대조로 확정한다.
 
 ## FAIL
 
 - 근거 없는 사업 사실이 하나라도 있다.
 - 근거 경로가 vault 밖을 가리키거나 파일이 없다.
+- 근거 파일이 비어 있거나, 기존 md 파일만 붙였을 뿐 원문이 해당 주장을 뒷받침하지 않는다.
 - 퍼센트 할인 등 숫자 주장이 근거 없이 쓰였다.
 - 작성 담당자가 같은 파일을 동시에 수정했거나 검수 전 순서를 건너뛰었다.
 
@@ -156,11 +159,81 @@ EXPECTED_SANDBOX = {
 }
 CITATION = re.compile(r"\[근거: ([^\]\r\n]+\.md)\]")
 AGENT_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+TOKEN = re.compile(r"\d+(?:[.,]\d+)*(?:%|퍼센트|원|만원|시간|시|분)?|[A-Za-z]+|[가-힣]{2,}")
+NUMBER_MARKER = re.compile(r"\d+(?:[.,]\d+)*(?:%|퍼센트|원|만원|시간|시|분)?")
+BUSINESS_TERMS = (
+    "메뉴", "가격", "할인", "무료", "배달", "포장", "주차", "영업", "영업시간",
+    "예약", "후기", "고객", "주소", "전화", "연락처", "대표", "시그니처",
+)
+STOP_TOKENS = {
+    "그리고", "또한", "하지만", "입니다", "합니다", "있는", "없는", "오늘은", "저희",
+    "우리", "가게", "매장", "정말", "매우", "편하게", "즐기세요", "만나보세요",
+}
+KOREAN_SUFFIXES = (
+    "입니다", "합니다", "하세요", "해요", "으로", "에서", "에게", "부터", "까지",
+    "은", "는", "이", "가", "을", "를", "과", "와", "도", "만", "의", "에", "로",
+)
 
 class KoreanArgumentParser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
         self.print_usage(sys.stderr)
         self.exit(2, f"FAIL\n- 입력 오류: {message}\n")
+
+def compact_text(text: str) -> str:
+    return re.sub(r"[^0-9a-z가-힣]+", "", text.lower())
+
+def strip_korean_suffix(token: str) -> str:
+    for suffix in KOREAN_SUFFIXES:
+        if token.endswith(suffix) and len(token) > len(suffix) + 1:
+            return token[:-len(suffix)]
+    return token
+
+def meaningful_tokens(text: str) -> list[str]:
+    tokens: list[str] = []
+    for raw in TOKEN.findall(text.lower()):
+        token = strip_korean_suffix(raw)
+        if len(token) < 2 or token in STOP_TOKENS:
+            continue
+        tokens.append(token)
+    return tokens
+
+def claim_without_citations(line: str) -> str:
+    text = CITATION.sub("", line)
+    text = re.sub(r"^[>\-\*\s]+", "", text)
+    return text.strip(" \t*_`'\".,!?:;·")
+
+def missing_required_markers(claim: str, evidence: str) -> list[str]:
+    evidence_compact = compact_text(evidence)
+    missing: list[str] = []
+    for marker in NUMBER_MARKER.findall(claim):
+        marker_compact = compact_text(marker)
+        if marker_compact and marker_compact not in evidence_compact:
+            missing.append(marker)
+    for term in BUSINESS_TERMS:
+        if term in claim and term not in evidence:
+            missing.append(term)
+    return missing
+
+def claim_supported_by_evidence(claim: str, evidence: str) -> bool:
+    """Minimal textual support check; final semantic judgment still belongs to Quality Checker."""
+    claim_core = claim_without_citations(claim)
+    if not claim_core:
+        return True
+    evidence_core = evidence.strip()
+    if not evidence_core:
+        return False
+    claim_compact = compact_text(claim_core)
+    evidence_compact = compact_text(evidence_core)
+    if claim_compact and claim_compact in evidence_compact:
+        return True
+    if missing_required_markers(claim_core, evidence_core):
+        return False
+    claim_tokens = meaningful_tokens(claim_core)
+    evidence_tokens = set(meaningful_tokens(evidence_core))
+    overlap = [token for token in claim_tokens if token in evidence_tokens]
+    if len(overlap) >= 2:
+        return True
+    return any(len(token) >= 3 and token in evidence_tokens for token in claim_tokens)
 
 def validate(target: Path, vault: Path) -> list[str]:
     errors: list[str] = []
@@ -206,6 +279,8 @@ def validate(target: Path, vault: Path) -> list[str]:
                 f"[근거: notes/store.md] 형식이 필요합니다: {stripped}"
             )
             continue
+        line_error_count = len(errors)
+        evidence_texts: list[str] = []
         for citation in citations:
             rel = Path(citation)
             evidence = (vault_root / rel).resolve()
@@ -213,6 +288,17 @@ def validate(target: Path, vault: Path) -> list[str]:
                 errors.append(f"unsafe evidence path: 홍보 초안 {number}행: {citation}")
             elif not evidence.is_file():
                 errors.append(f"missing evidence: 홍보 초안 {number}행: {citation}")
+            else:
+                try:
+                    evidence_text = evidence.read_text(encoding="utf-8-sig")
+                except OSError as exc:
+                    errors.append(f"evidence read error: 홍보 초안 {number}행: {citation}: {exc}")
+                    continue
+                if not evidence_text.strip():
+                    errors.append(f"empty evidence: 홍보 초안 {number}행: {citation}")
+                evidence_texts.append(evidence_text)
+        if len(errors) == line_error_count and not claim_supported_by_evidence(stripped, "\n".join(evidence_texts)):
+            errors.append(f"evidence does not support claim: 홍보 초안 {number}행: {stripped}")
     return errors
 
 def main() -> int:

@@ -79,8 +79,8 @@ def validate() -> list[str]:
         manifest = json.loads((PLUGIN / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         if manifest.get("name") != PLUGIN.name or manifest.get("skills") != "./skills/":
             errors.append("invalid plugin manifest identity or skills path")
-        if manifest.get("version") != "1.0.1":
-            errors.append("plugin version must be 1.0.1")
+        if manifest.get("version") != "1.0.2":
+            errors.append("plugin version must be 1.0.2")
         if manifest.get("author", {}).get("name") != "Jeon Seung-gi":
             errors.append("plugin author mismatch")
         public_repo = "https://github.com/jsk7767/codex-harness-classroom"
@@ -129,6 +129,9 @@ def validate() -> list[str]:
         '"content-writer": "workspace-write"',
         '"quality-checker": "read-only"',
         "line.count(\"[근거:\")",
+        "claim_supported_by_evidence",
+        "empty evidence",
+        "evidence does not support claim",
     )
     for contract in required_validator_contracts:
         if contract not in scaffolder_text:

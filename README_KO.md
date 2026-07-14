@@ -64,7 +64,7 @@ Obsidian vault는 "C:\내-지식창고\my-llm-wiki"야.
 Fact Checker → Content Writer → Quality Checker 순서와 PASS/FAIL 계약을 지켜줘.
 ```
 
-첫 validator 결과는 `PASS`여야 합니다.
+첫 validator 결과는 `PASS`여야 합니다. 이 validator는 파일 구조, 안전한 근거 경로, 빈 근거 파일, 초안 문장과 근거 원문의 **최소 텍스트 일치**를 자동 확인합니다. 다만 “정말 같은 의미인가”의 최종 판정은 Quality Checker가 원문과 독립 대조해서 확정합니다.
 
 ### 4. 프롬프트로 일부러 근거 없는 20% 할인 만들기
 

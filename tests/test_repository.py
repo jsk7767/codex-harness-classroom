@@ -30,7 +30,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(plugin["policy"], {"installation": "AVAILABLE", "authentication": "ON_INSTALL"})
         manifest = json.loads((ROOT / "plugins/codex-harness-classroom/.codex-plugin/plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["name"], "codex-harness-classroom")
-        self.assertEqual(manifest["version"], "1.0.1")
+        self.assertEqual(manifest["version"], "1.0.2")
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertEqual(manifest["author"]["name"], "Jeon Seung-gi")
         public_repo = "https://github.com/jsk7767/codex-harness-classroom"
@@ -145,6 +145,18 @@ class RepositoryTests(unittest.TestCase):
             grounded = subprocess.run(command, text=True, capture_output=True, encoding="utf-8", check=False)
             self.assertEqual(grounded.returncode, 0, grounded.stdout + grounded.stderr)
             self.assertIn("PASS", grounded.stdout)
+
+            draft.write_text("# 홍보 초안\n\n전 메뉴 20% 할인! [근거: notes/store.md]\n", encoding="utf-8")
+            unrelated_evidence = subprocess.run(command, text=True, capture_output=True, encoding="utf-8", check=False)
+            self.assertEqual(unrelated_evidence.returncode, 1)
+            self.assertIn("evidence does not support claim", unrelated_evidence.stdout)
+
+            empty_evidence = vault / "notes/empty.md"
+            empty_evidence.write_text("", encoding="utf-8")
+            draft.write_text("# 홍보 초안\n\n전 메뉴 20% 할인! [근거: notes/empty.md]\n", encoding="utf-8")
+            empty_evidence_result = subprocess.run(command, text=True, capture_output=True, encoding="utf-8", check=False)
+            self.assertEqual(empty_evidence_result.returncode, 1)
+            self.assertIn("empty evidence", empty_evidence_result.stdout)
 
             draft.write_text(
                 "# 홍보 초안\n\n오늘 배달 무료! [근거: notes/store.md] [근거: notes/missing.md]\n",
