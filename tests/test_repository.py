@@ -30,6 +30,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(plugin["policy"], {"installation": "AVAILABLE", "authentication": "ON_INSTALL"})
         manifest = json.loads((ROOT / "plugins/codex-harness-classroom/.codex-plugin/plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["name"], "codex-harness-classroom")
+        self.assertEqual(manifest["version"], "1.0.1")
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertEqual(manifest["author"]["name"], "Jeon Seung-gi")
         public_repo = "https://github.com/jsk7767/codex-harness-classroom"
@@ -94,6 +95,8 @@ class RepositoryTests(unittest.TestCase):
                 self.assertIn("description", parsed)
                 self.assertIn("developer_instructions", parsed)
                 self.assertIn("sandbox_mode", parsed)
+                self.assertIn("UTF-8", parsed["developer_instructions"])
+            self.assertIn("UTF-8", (target / "AGENTS.md").read_text(encoding="utf-8"))
             validator = target / "scripts/validate_harness.py"
             command = [sys.executable, str(validator), "--target", str(target), "--vault", str(vault)]
             passed = subprocess.run(command, text=True, capture_output=True, encoding="utf-8", check=False)
@@ -207,6 +210,7 @@ class RepositoryTests(unittest.TestCase):
         )
         combined = "\n".join(path.read_text(encoding="utf-8") for path in runtime_paths)
         self.assertIn("[근거: notes/store.md]", combined)
+        self.assertIn("UTF-8", combined)
         for drift in ("[근거: vault/기준/상대경로.md]", "[근거: vault의/상대경로.md]", "[근거: 상대경로.md]"):
             self.assertNotIn(drift, combined)
         scaffolder = (skill_root / "scripts/scaffold_harness.py").read_text(encoding="utf-8")

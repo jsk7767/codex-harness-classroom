@@ -23,6 +23,7 @@ Main Commander → Fact Checker → Content Writer → Quality Checker → PASS/
 독립적인 읽기 전용 감사만 병렬로 실행할 수 있다. 같은 파일을 쓰는 담당 직원은 직렬로 실행한다.
 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언 및 기타 사업 사실을 지식창고 근거 없이 만들지 않는다.
 근거가 없으면 줄을 `[확인 필요]`로 시작하고 홍보 문구에서 제외한다. 증거는 vault 루트 기준 `[근거: notes/store.md]` 형식만 사용한다.
+Windows PowerShell에서 한글 파일을 읽을 때 UTF-8을 명시한다. 글자가 깨지면 추측하지 말고 작업을 중단한 뒤 UTF-8로 다시 읽는다.
 
 ## 산출물
 
@@ -36,7 +37,7 @@ FACT_CHECKER = '''name = "fact-checker"
 description = "Obsidian 지식창고에서 홍보 문안에 사용할 사실과 근거를 확인하는 읽기 전용 담당 직원"
 sandbox_mode = "read-only"
 developer_instructions = """
-사용자가 지정한 Obsidian vault만 회사 지식창고로 취급한다. 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언 및 모든 사업 사실을 원문에서 확인한다. 승인한 사실마다 vault 루트 기준 `[근거: notes/store.md]` 형식의 상대 경로를 붙여 _workspace/01_fact-check.md로 Main Commander에게 전달한다. 근거가 없으면 [확인 필요]로 표시한다. 내용을 추측하거나 홍보 문안을 작성하지 않는다.
+사용자가 지정한 Obsidian vault만 회사 지식창고로 취급한다. Windows PowerShell에서 한글 원문을 읽을 때 UTF-8을 명시하고, 글자가 깨지면 추측하지 말고 UTF-8로 다시 읽는다. 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언 및 모든 사업 사실을 원문에서 확인한다. 승인한 사실마다 vault 루트 기준 `[근거: notes/store.md]` 형식의 상대 경로를 붙여 _workspace/01_fact-check.md로 Main Commander에게 전달한다. 근거가 없으면 [확인 필요]로 표시한다. 내용을 추측하거나 홍보 문안을 작성하지 않는다.
 """
 '''
 
@@ -44,7 +45,7 @@ CONTENT_WRITER = '''name = "content-writer"
 description = "승인된 사실만 사용해 한국어 홍보 문안을 작성하는 담당 직원"
 sandbox_mode = "workspace-write"
 developer_instructions = """
-_workspace/01_fact-check.md에서 승인되고 근거 경로가 있는 사실만 사용한다. _workspace/promotional-draft.md 하나만 작성한다. 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언이나 다른 사업 사실을 보완하거나 추측하지 않는다. 사실이 부족하면 줄을 `[확인 필요]`로 시작하고 주장하지 않는다. 게시 가능한 모든 내용 줄에 vault 루트 기준 `[근거: notes/store.md]` 형식의 상대 경로를 붙인다.
+Windows PowerShell에서 한글 파일을 읽을 때 UTF-8을 명시하고, 글자가 깨지면 추측하지 말고 UTF-8로 다시 읽는다. _workspace/01_fact-check.md에서 승인되고 근거 경로가 있는 사실만 사용한다. _workspace/promotional-draft.md 하나만 작성한다. 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언이나 다른 사업 사실을 보완하거나 추측하지 않는다. 사실이 부족하면 줄을 `[확인 필요]`로 시작하고 주장하지 않는다. 게시 가능한 모든 내용 줄에 vault 루트 기준 `[근거: notes/store.md]` 형식의 상대 경로를 붙인다.
 """
 '''
 
@@ -52,7 +53,7 @@ QUALITY_CHECKER = '''name = "quality-checker"
 description = "홍보 문안의 모든 사업 사실을 지식창고와 독립 대조해 PASS 또는 FAIL을 판정하는 읽기 전용 담당 직원"
 sandbox_mode = "read-only"
 developer_instructions = """
-_workspace/promotional-draft.md를 Obsidian vault 원문과 독립적으로 대조한다. 제목과 `[확인 필요]` 줄을 제외한 모든 게시 가능 내용 줄에 vault 루트 기준 `[근거: notes/store.md]` 형식의 근거가 있어야 한다. 경로가 유효하지 않거나 원문과 다르면 FAIL이다. 결과와 수정 지시를 _workspace/03_quality-check.md 형식으로 Main Commander에게 반환한다. 문안을 직접 고치지 않는다.
+Windows PowerShell에서 한글 파일을 읽을 때 UTF-8을 명시하고, 글자가 깨지면 추측하지 말고 UTF-8로 다시 읽는다. _workspace/promotional-draft.md를 Obsidian vault 원문과 독립적으로 대조한다. 제목과 `[확인 필요]` 줄을 제외한 모든 게시 가능 내용 줄에 vault 루트 기준 `[근거: notes/store.md]` 형식의 근거가 있어야 한다. 경로가 유효하지 않거나 원문과 다르면 FAIL이다. 결과와 수정 지시를 _workspace/03_quality-check.md 형식으로 Main Commander에게 반환한다. 문안을 직접 고치지 않는다.
 """
 '''
 
@@ -63,11 +64,12 @@ description: Write or review Korean store promotion content using only facts app
 
 # 근거 기반 가게 홍보
 
-1. Fact Checker의 승인 사실과 vault 루트 기준 상대 경로를 확인한다.
-2. 승인 사실만 사용하고 모든 게시 가능 내용 줄에 `[근거: notes/store.md]` 형식의 근거를 붙인다.
-3. 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언 또는 다른 사업 사실을 추측하지 않는다.
-4. 근거가 없으면 줄을 `[확인 필요]`로 시작하고 홍보 주장으로 쓰지 않는다.
-5. Quality Checker의 독립 대조와 PASS 뒤에만 완료한다.
+1. Windows PowerShell에서 한글 파일을 읽을 때 UTF-8을 명시하고, 글자가 깨지면 추측하지 말고 UTF-8로 다시 읽는다.
+2. Fact Checker의 승인 사실과 vault 루트 기준 상대 경로를 확인한다.
+3. 승인 사실만 사용하고 모든 게시 가능 내용 줄에 `[근거: notes/store.md]` 형식의 근거를 붙인다.
+4. 메뉴, 가격, 할인, 영업시간, 주차, 후기, 고객 발언 또는 다른 사업 사실을 추측하지 않는다.
+5. 근거가 없으면 줄을 `[확인 필요]`로 시작하고 홍보 주장으로 쓰지 않는다.
+6. Quality Checker의 독립 대조와 PASS 뒤에만 완료한다.
 '''
 
 TEAM_SPEC = """# 홍보팀 조직 명세
@@ -78,6 +80,7 @@ TEAM_SPEC = """# 홍보팀 조직 명세
 - 표시명: `{vault_name}`
 - 개인 로컬 전체 경로는 생성물에 저장하지 않는다.
 - 증거는 vault 루트 기준 상대 경로를 `[근거: notes/store.md]` 형식으로 기록한다.
+- Windows에서 한글 파일은 UTF-8로 읽고, 깨진 글자를 근거로 사용하지 않는다.
 
 ## 조직도와 순서
 

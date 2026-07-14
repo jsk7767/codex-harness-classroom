@@ -79,6 +79,8 @@ def validate() -> list[str]:
         manifest = json.loads((PLUGIN / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         if manifest.get("name") != PLUGIN.name or manifest.get("skills") != "./skills/":
             errors.append("invalid plugin manifest identity or skills path")
+        if manifest.get("version") != "1.0.1":
+            errors.append("plugin version must be 1.0.1")
         if manifest.get("author", {}).get("name") != "Jeon Seung-gi":
             errors.append("plugin author mismatch")
         public_repo = "https://github.com/jsk7767/codex-harness-classroom"
@@ -111,6 +113,15 @@ def validate() -> list[str]:
     if evidence_example not in safety_text:
         errors.append("safety contract missing canonical evidence syntax")
     scaffolder_text = (SKILL / "scripts/scaffold_harness.py").read_text(encoding="utf-8")
+    utf8_contract_paths = (
+        SKILL / "SKILL.md",
+        SKILL / "references/safety-contract.md",
+        SKILL / "scripts/scaffold_harness.py",
+        ROOT / "README_KO.md",
+    )
+    for path in utf8_contract_paths:
+        if "UTF-8" not in path.read_text(encoding="utf-8"):
+            errors.append(f"Windows UTF-8 safety contract missing: {path.relative_to(ROOT)}")
     required_validator_contracts = (
         'parser.add_argument("--vault", required=True',
         "EXPECTED_SANDBOX",

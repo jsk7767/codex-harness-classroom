@@ -1,6 +1,6 @@
 {
   "name": "codex-harness-classroom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Korean-first classroom skill that safely scaffolds a three-agent Codex marketing harness from an Obsidian knowledge vault.",
   "author": {
     "name": "Jeon Seung-gi",
