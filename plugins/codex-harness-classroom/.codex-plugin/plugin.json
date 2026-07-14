@@ -1,0 +1,23 @@
+{
+  "name": "codex-harness-classroom",
+  "version": "1.0.0",
+  "description": "Korean-first classroom skill that safely scaffolds a three-agent Codex marketing harness from an Obsidian knowledge vault.",
+  "author": {
+    "name": "Jeon Seung-gi",
+    "url": "https://github.com/jsk7767"
+  },
+  "homepage": "https://github.com/jsk7767/codex-harness-classroom",
+  "repository": "https://github.com/jsk7767/codex-harness-classroom",
+  "license": "Apache-2.0",
+  "keywords": ["codex", "education", "harness", "obsidian", "korean"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "가게 홍보팀 하네스 교실",
+    "shortDescription": "Obsidian 근거 기반 3담당자 홍보팀 생성",
+    "longDescription": "초보자가 회사 지식창고인 Obsidian vault를 근거로 Fact Checker, Content Writer, Quality Checker 순서의 Codex 하네스를 안전하게 생성합니다.",
+    "developerName": "Jeon Seung-gi (jsk7767)",
+    "category": "Education",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": ["내 가게 홍보팀 하네스를 구성해줘"]
+  }
+}

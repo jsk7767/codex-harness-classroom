@@ -1,0 +1,20 @@
+{
+  "name": "codex-harness-classroom",
+  "interface": {
+    "displayName": "Codex Harness Classroom"
+  },
+  "plugins": [
+    {
+      "name": "codex-harness-classroom",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-harness-classroom"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    }
+  ]
+}
